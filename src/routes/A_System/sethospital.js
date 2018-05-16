@@ -33,9 +33,41 @@ const getValue = obj =>
 const statusMap = ['default', 'processing'];
 const status = ['已下架', '已上架'];
 
-@connect(({ ques, loading }) => ({
-  ques,
-  loading: loading.models.ques,
+const CreateForm = Form.create()(props => {
+  const { modalVisible, form, handleAdd, handleModalVisible, data_key, data_name } = props;
+  const okHandle = () => {
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      form.resetFields();
+      handleAdd(fieldsValue);
+    });
+  };
+  return (
+    <Modal
+      title="编辑"
+      visible={modalVisible}
+      onOk={okHandle}
+      onCancel={() => handleModalVisible()}
+    >
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="id">
+        {form.getFieldDecorator('key', {
+          rules: [{ required: true, message: '请输入...' }],
+          initialValue:data_key,
+        })(<Input disabled />)}
+      </FormItem>
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="医院名称">
+        {form.getFieldDecorator('name', {
+          rules: [{ required: true, message: '请输入...' }],
+          initialValue:data_name,
+        })(<Input placeholder="请输入" />)}
+      </FormItem>
+    </Modal>
+  );
+});
+
+@connect(({ sethospital, loading }) => ({
+  sethospital,
+  loading: loading.models.sethospital,
 }))
 @Form.create()
 export default class TableList extends PureComponent {
@@ -44,12 +76,15 @@ export default class TableList extends PureComponent {
     expandForm: false,
     selectedRows: [],
     formValues: {},
+    //表格传递到弹框的值
+    data_key: 0,
+    data_name: '',
   };
 
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'ques/fetch',
+      type: 'sethospital/fetch',
     });
   }
 
@@ -74,10 +109,11 @@ export default class TableList extends PureComponent {
     }
 
     dispatch({
-      type: 'ques/fetch',
+      type: 'sethospital/fetch',
       payload: params,
     });
   };
+
   handleFormReset = () => {
     const { form, dispatch } = this.props;
     form.resetFields();
@@ -85,7 +121,7 @@ export default class TableList extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'ques/fetch',
+      type: 'sethospital/fetch',
       payload: {},
     });
   };
@@ -114,25 +150,30 @@ export default class TableList extends PureComponent {
       });
 
       dispatch({
-        type: 'ques/fetch',
+        type: 'sethospital/fetch',
         payload: values,
       });
     });
   };
 
-  handleModalVisible = (flag) => {
-    this.setState({
-      modalVisible: !!flag,
-    });
+  handleModalVisible = (flag, record) => {
+    if (record)
+      this.setState({
+        modalVisible: !!flag,
+        data_key: record.key,
+        data_name: record.hosName,
+      });
+    else
+      this.setState({
+        modalVisible: !!flag,
+      });
   };
 
   handleAdd = fields => {
     this.props.dispatch({
-      type: 'ques/add',
+      type: 'sethospital/add',
       payload: {
         name: fields.name,
-        sort: fields.sort,
-        isList: fields.status,
         id: fields.key,
       },
     });
@@ -147,7 +188,7 @@ export default class TableList extends PureComponent {
   handleDel = fields => {
     const { selectedRows } = this.state;
     this.props.dispatch({
-      type: 'ques/remove',
+      type: 'sethospital/remove',
       payload: {
         id: fields.key,
       },
@@ -163,58 +204,30 @@ export default class TableList extends PureComponent {
   tableUpdate = () => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'ques/fetch',
+      type: 'sethospital/fetch',
     });
   }
 
-  renderSimpleForm() {
-    const { getFieldDecorator } = this.props.form;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={8} sm={24}>
-            <FormItem label="问题">
-              {getFieldDecorator('content')(<Input placeholder="请输入" />)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="医生">
-              {getFieldDecorator('docName')(<Input placeholder="请输入" />)}
-            </FormItem>
-          </Col>
-          <Col md={8} sm={24}>
-            <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
-                重置
-              </Button>
-            </span>
-          </Col>
-        </Row>
-      </Form>
-    );
-  }
-
-  renderForm() {
-    return this.renderSimpleForm();
-  }
-
   render() {
-    const { ques: { data }, loading } = this.props;
-    const { selectedRows } = this.state;
+    const { sethospital: { data }, loading } = this.props;
+    const { selectedRows, modalVisible, data_key, data_name } = this.state;
 
     const columns = [{
-      title: '名称',
-      dataIndex: 'nickName',
+      title: 'id',
+      dataIndex: 'key',
     }, {
-      title: '问题',
-      dataIndex: 'content',
+      title: '医院名称',
+      dataIndex: 'hosName',
     }, {
-      title: '医生',
-      dataIndex: 'docName',
-    }];
+      title: '操作',
+      render: (value, record) => (
+        <Fragment>
+            <a onClick={() => this.handleModalVisible(true,record)}>编辑</a>
+            <Divider type="vertical" />
+            <a onClick={() => this.handleDel(record)}>删除</a>
+          </Fragment>
+      ),
+    }, ];
 
     const parentMethods = {
       handleAdd: this.handleAdd,
@@ -225,8 +238,10 @@ export default class TableList extends PureComponent {
       <PageHeaderLayout title="">
         <Card bordered={false}>
           <div className={styles.tableList}>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
             <div className={styles.tableListOperator}>
+              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true,{key:0})}>
+                新增
+              </Button>
             </div>
             <StandardTable
               selectedRows={selectedRows}
@@ -239,6 +254,7 @@ export default class TableList extends PureComponent {
             />
           </div>
         </Card>
+        <CreateForm {...parentMethods} modalVisible={modalVisible} data_key={data_key} data_name={data_name} />
       </PageHeaderLayout>
     );
   }

@@ -74,22 +74,47 @@ export const getRouterData = app => {
       component: dynamicWrapper(app, ['user', 'login'], () =>
         import ('../layouts/BasicLayout')),
     },
-    '/dashboard/analysis': {
-      component: dynamicWrapper(app, ['chart'], () =>
-        import ('../routes/Dashboard/Analysis')),
+    '/banner/index': {
+      component: dynamicWrapper(app, ['banner'], () =>
+        import ('../routes/A_banner/index')),
     },
-    '/dashboard/monitor': {
-      component: dynamicWrapper(app, ['monitor'], () =>
-        import ('../routes/Dashboard/Monitor')),
+    '/question/index': {
+      component: dynamicWrapper(app, ['ques'], () =>
+        import ('../routes/A_Question/index')),
     },
-    '/dashboard/workplace': {
-      component: dynamicWrapper(app, ['project', 'activities', 'chart'], () =>
-        import ('../routes/Dashboard/Workplace')
-      ),
-      // hideInBreadcrumb: true,
-      // name: '工作台',
-      // authority: 'admin',
+    '/question/index2': {
+      component: dynamicWrapper(app, ['answer'], () =>
+        import ('../routes/A_Question/index2')),
     },
+    '/member/index': {
+      component: dynamicWrapper(app, ['userlist'], () =>
+        import ('../routes/A_Member/index')),
+    },
+    '/member/index2': {
+      component: dynamicWrapper(app, ['doclist'], () =>
+        import ('../routes/A_Member/index2')),
+    },
+    '/finance/index': { //提现
+      component: dynamicWrapper(app, ['withdraw'], () =>
+        import ('../routes/A_Finance/index')),
+    },
+    '/finance/index2': { //充值
+      component: dynamicWrapper(app, ['recharge'], () =>
+        import ('../routes/A_Finance/index2')),
+    },
+    '/system/sethospital': { //医院配置
+      component: dynamicWrapper(app, ['sethospital'], () =>
+        import ('../routes/A_System/sethospital')),
+    },
+    '/system/setdepart': { //专长配置
+      component: dynamicWrapper(app, ['setdepart'], () =>
+        import ('../routes/A_System/setdepart')),
+    },
+    '/system/settitle': { //职称配置
+      component: dynamicWrapper(app, ['settitle'], () =>
+        import ('../routes/A_System/settitle')),
+    },
+
     '/form/basic-form': {
       component: dynamicWrapper(app, ['form'], () =>
         import ('../routes/Forms/BasicForm')),
@@ -145,15 +170,6 @@ export const getRouterData = app => {
       component: dynamicWrapper(app, ['list'], () =>
         import ('../routes/List/Articles')),
     },
-    '/profile/basic': {
-      component: dynamicWrapper(app, ['profile'], () =>
-        import ('../routes/Profile/BasicProfile')),
-    },
-    '/profile/advanced': {
-      component: dynamicWrapper(app, ['profile'], () =>
-        import ('../routes/Profile/AdvancedProfile')
-      ),
-    },
     '/result/success': {
       component: dynamicWrapper(app, [], () =>
         import ('../routes/Result/Success')),
@@ -196,10 +212,6 @@ export const getRouterData = app => {
         import ('../routes/User/RegisterResult')),
     },
 
-    '/banner/index': {
-      component: dynamicWrapper(app, ['banner'], () =>
-        import ('../routes/A_banner/index')),
-    },
     // '/user/:id': {
     //   component: dynamicWrapper(app, [], () => import('../routes/User/SomeComponent')),
     // },

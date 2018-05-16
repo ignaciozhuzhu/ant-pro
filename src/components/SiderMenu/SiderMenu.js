@@ -192,11 +192,11 @@ export default class SiderMenu extends PureComponent {
     const { logo, collapsed, onCollapse } = this.props;
     const { openKeys } = this.state;
     // Don't show popup menu when it is been collapsed
-    const menuProps = collapsed
-      ? {}
-      : {
-          openKeys,
-        };
+    const menuProps = collapsed ?
+      {} :
+      {
+        openKeys,
+      };
     // if pathname can't match, use the nearest parent's key
     let selectedKeys = this.getSelectedMenuKeys();
     if (!selectedKeys.length) {
@@ -215,7 +215,7 @@ export default class SiderMenu extends PureComponent {
         <div className={styles.logo} key="logo">
           <Link to="/">
             <img src={logo} alt="logo" />
-            <h1>Ant Design Pro</h1>
+            <h1>美好食后台管理系统</h1>
           </Link>
         </div>
         <Menu

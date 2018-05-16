@@ -12,8 +12,6 @@ import {
   Button,
   Dropdown,
   Menu,
-  InputNumber,
-  DatePicker,
   Modal,
   message,
   Badge,
@@ -23,6 +21,7 @@ import {
 import StandardTable from 'components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import Upload from './upload'
+import $ from 'jquery'
 
 import styles from './index.less';
 
@@ -36,7 +35,7 @@ const statusMap = ['default', 'processing'];
 const status = ['已下架', '已上架'];
 
 const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible } = props;
+  const { modalVisible, form, handleAdd, handleModalVisible, data_key, data_no, data_avatar, data_sort, data_status } = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -51,15 +50,31 @@ const CreateForm = Form.create()(props => {
       onOk={okHandle}
       onCancel={() => handleModalVisible()}
     >
-      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="名称">
-        {form.getFieldDecorator('no', {
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="id">
+        {form.getFieldDecorator('key', {
           rules: [{ required: true, message: '请输入...' }],
+          initialValue:data_key,
+        })(<Input disabled />)}
+      </FormItem>
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="名称">
+        {form.getFieldDecorator('name', {
+          rules: [{ required: true, message: '请输入...' }],
+          initialValue:data_no,
         })(<Input placeholder="请输入" />)}
       </FormItem>
       <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="排序">
-        {form.getFieldDecorator('avatar', {
+        {form.getFieldDecorator('sort', {
           rules: [{ required: true, message: '请输入...' }],
+          initialValue:data_sort,
         })(<Input placeholder="请输入" />)}
+      </FormItem>
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="状态">
+         {form.getFieldDecorator('status', {initialValue:data_status})(
+                <Select placeholder="请选择" style={{ width: '100%' }}>
+                  <Option value="1">已上架</Option>
+                  <Option value="0">已下架</Option>
+                </Select>
+              )}
       </FormItem>
     </Modal>
   );
@@ -76,11 +91,16 @@ export default class TableList extends PureComponent {
     expandForm: false,
     selectedRows: [],
     formValues: {},
+    //表格传递到弹框的值
+    data_key: 0,
+    data_no: '',
+    data_avatar: '',
+    data_sort: '',
+    data_status: '',
   };
 
   componentDidMount() {
     const { dispatch } = this.props;
-    console.log('componentDidMount')
     dispatch({
       type: 'banner/fetch',
     });
@@ -140,7 +160,7 @@ export default class TableList extends PureComponent {
 
       const values = {
         ...fieldsValue,
-        updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
+        //updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
       };
 
       this.setState({
@@ -154,25 +174,38 @@ export default class TableList extends PureComponent {
     });
   };
 
-  handleModalVisible = flag => {
-    this.setState({
-      modalVisible: !!flag,
-    });
+  handleModalVisible = (flag, record) => {
+    if (record)
+      this.setState({
+        modalVisible: !!flag,
+        data_key: record.key,
+        data_no: record.no,
+        data_avatar: record.avatar,
+        data_sort: record.sort,
+        data_status: record.status,
+      });
+    else
+      this.setState({
+        modalVisible: !!flag,
+      });
   };
 
   handleAdd = fields => {
     this.props.dispatch({
       type: 'banner/add',
       payload: {
-        no: fields.no,
-        avatar: fields.avatar,
+        name: fields.name,
+        sort: fields.sort,
+        isList: fields.status,
+        id: fields.key,
       },
     });
 
-    message.success('添加成功');
+    message.success('操作成功');
     this.setState({
       modalVisible: false,
     });
+    this.tableUpdate()
   };
 
   handleDel = fields => {
@@ -180,15 +213,23 @@ export default class TableList extends PureComponent {
     this.props.dispatch({
       type: 'banner/remove',
       payload: {
-        no: 'TradeCode 1',
+        id: fields.key,
       },
     });
 
-    message.success('添加成功');
+    message.success('操作成功');
     this.setState({
       modalVisible: false,
     });
+    this.tableUpdate()
+
   };
+  tableUpdate = () => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'banner/fetch',
+    });
+  }
 
   renderSimpleForm() {
     const { getFieldDecorator } = this.props.form;
@@ -197,7 +238,7 @@ export default class TableList extends PureComponent {
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={8} sm={24}>
             <FormItem label="名称">
-              {getFieldDecorator('no')(<Input placeholder="请输入" />)}
+              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
             </FormItem>
           </Col>
           <Col md={8} sm={24}>
@@ -228,12 +269,43 @@ export default class TableList extends PureComponent {
   renderForm() {
     return this.renderSimpleForm();
   }
+  FetchOptionsPB = (data = {}) => {
+    return {
+      method: 'POST',
+      credentials: 'include',
+      body: data,
+    }
+  };
+
+  save = () => {
+    let imgurl = $(".avatar-uploader .ant-upload.ant-upload-select.ant-upload-select-picture-card img")[0].src
+    imgurl = btoa(imgurl)
+    //console.log('save,base64', imgurl)
+    //let url = `http://localhost:8000/api/banner4`
+    let url = `/api2/ajax/mhshiHandler.ashx?fn=insertbanner`
+    let payload = {
+      imgurl: imgurl,
+    };
+    let data = new FormData();
+    data.append("json", JSON.stringify(payload));
+    fetch(url, this.FetchOptionsPB(data))
+      .then(response => response.json())
+      .then(json => {
+        console.log('操作结果', json.data)
+        message.info('资料已更新');
+        this.tableUpdate()
+      }).catch(XHR => console.error("XHR:" + XHR));
+  }
+
 
   render() {
     const { banner: { data }, loading } = this.props;
-    const { selectedRows, modalVisible } = this.state;
+    const { selectedRows, modalVisible, data_key, data_no, data_avatar, data_sort, data_status } = this.state;
 
     const columns = [{
+      title: 'id',
+      dataIndex: 'key',
+    }, {
       title: '名称',
       dataIndex: 'no',
     }, {
@@ -261,11 +333,11 @@ export default class TableList extends PureComponent {
       dataIndex: 'sort',
     }, {
       title: '操作',
-      render: () => (
+      render: (value, record) => (
         <Fragment>
-            <a onClick={() => this.handleModalVisible(true)}>编辑</a>
+            <a onClick={() => this.handleModalVisible(true,record)}>编辑</a>
             <Divider type="vertical" />
-            <a onClick={() => this.handleDel()}>删除</a>
+            <a onClick={() => this.handleDel(record)}>删除</a>
           </Fragment>
       ),
     }, ];
@@ -281,10 +353,10 @@ export default class TableList extends PureComponent {
           <div className={styles.tableList}>
             <div className={styles.tableListForm}>{this.renderForm()}</div>
             <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建
-              </Button>
               <Upload />
+              <Button type="primary" onClick={() => this.save()}>
+                保存
+              </Button>
             </div>
             <StandardTable
               selectedRows={selectedRows}
@@ -297,7 +369,7 @@ export default class TableList extends PureComponent {
             />
           </div>
         </Card>
-        <CreateForm {...parentMethods} modalVisible={modalVisible} />
+        <CreateForm {...parentMethods} modalVisible={modalVisible} data_key={data_key} data_no={data_no} data_avatar={data_avatar} data_sort={data_sort} data_status={data_status} />
       </PageHeaderLayout>
     );
   }

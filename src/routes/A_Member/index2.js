@@ -33,9 +33,9 @@ const getValue = obj =>
 const statusMap = ['default', 'processing'];
 const status = ['已下架', '已上架'];
 
-@connect(({ ques, loading }) => ({
-  ques,
-  loading: loading.models.ques,
+@connect(({ doclist, loading }) => ({
+  doclist,
+  loading: loading.models.doclist,
 }))
 @Form.create()
 export default class TableList extends PureComponent {
@@ -49,7 +49,7 @@ export default class TableList extends PureComponent {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'ques/fetch',
+      type: 'doclist/fetch',
     });
   }
 
@@ -74,7 +74,7 @@ export default class TableList extends PureComponent {
     }
 
     dispatch({
-      type: 'ques/fetch',
+      type: 'doclist/fetch',
       payload: params,
     });
   };
@@ -85,7 +85,7 @@ export default class TableList extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'ques/fetch',
+      type: 'doclist/fetch',
       payload: {},
     });
   };
@@ -114,7 +114,7 @@ export default class TableList extends PureComponent {
       });
 
       dispatch({
-        type: 'ques/fetch',
+        type: 'doclist/fetch',
         payload: values,
       });
     });
@@ -128,7 +128,7 @@ export default class TableList extends PureComponent {
 
   handleAdd = fields => {
     this.props.dispatch({
-      type: 'ques/add',
+      type: 'doclist/add',
       payload: {
         name: fields.name,
         sort: fields.sort,
@@ -147,7 +147,7 @@ export default class TableList extends PureComponent {
   handleDel = fields => {
     const { selectedRows } = this.state;
     this.props.dispatch({
-      type: 'ques/remove',
+      type: 'doclist/remove',
       payload: {
         id: fields.key,
       },
@@ -163,7 +163,7 @@ export default class TableList extends PureComponent {
   tableUpdate = () => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'ques/fetch',
+      type: 'doclist/fetch',
     });
   }
 
@@ -173,13 +173,13 @@ export default class TableList extends PureComponent {
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={8} sm={24}>
-            <FormItem label="问题">
-              {getFieldDecorator('content')(<Input placeholder="请输入" />)}
+            <FormItem label="名字">
+              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
             </FormItem>
           </Col>
           <Col md={8} sm={24}>
-            <FormItem label="医生">
-              {getFieldDecorator('docName')(<Input placeholder="请输入" />)}
+            <FormItem label="电话">
+              {getFieldDecorator('phone')(<Input placeholder="请输入" />)}
             </FormItem>
           </Col>
           <Col md={8} sm={24}>
@@ -202,18 +202,45 @@ export default class TableList extends PureComponent {
   }
 
   render() {
-    const { ques: { data }, loading } = this.props;
+    const { doclist: { data }, loading } = this.props;
     const { selectedRows } = this.state;
 
     const columns = [{
-      title: '名称',
+      title: '昵称',
       dataIndex: 'nickName',
     }, {
-      title: '问题',
-      dataIndex: 'content',
+      title: '头像',
+      dataIndex: 'avatar',
+      render(val) {
+        return <Avatar src={val} shape="square" size="large" />
+      }
     }, {
-      title: '医生',
-      dataIndex: 'docName',
+      title: '姓名',
+      dataIndex: 'realName',
+    }, {
+      title: '电话',
+      dataIndex: 'phone',
+    }, {
+      title: '已回答',
+      dataIndex: 'answeredNum',
+    }, {
+      title: '医院',
+      dataIndex: 'hosName',
+    }, {
+      title: '专长',
+      dataIndex: 'special',
+    }, {
+      title: '简介',
+      dataIndex: 'intro',
+      render(val) {
+        return <div>{val?val.substr(0,20)+'...':''}</div>
+      },
+    }, {
+      title: '粉丝',
+      dataIndex: 'fans',
+    }, {
+      title: '氧分',
+      dataIndex: 'oxygen',
     }];
 
     const parentMethods = {

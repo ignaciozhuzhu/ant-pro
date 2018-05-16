@@ -16,12 +16,12 @@ const proxy = {
   // 支持值为 Object 和 Array
   'GET /api/currentUser': {
     $desc: '获取当前用户接口',
-    $params: {
-      pageSize: {
-        desc: '分页',
-        exp: 2,
-      },
-    },
+    /*    $params: {
+          pageSize: {
+            desc: '分页',
+            exp: 2,
+          },
+        },*/
     $body: {
       name: 'ignacio zhu',
       avatar: 'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png',
@@ -59,9 +59,11 @@ const proxy = {
     $body: postRule,
   },
   //
-  'GET /api/banner': 'http://192.168.60.23:8085/ajax/mhshiHandler.ashx?fn=getquestionlist&content=&pageNum=0&pageSize=10&canAnswer=true',
+  //'GET /api/banner': 'http://192.168.60.23:8085/ajax/mhshiHandler.ashx?fn=getquestionlist&content=&pageNum=0&pageSize=10&canAnswer=true',
   'GET /api/banner3': 'http://mymengqiqi.com/mhshi/ajax/mhshiHandler.ashx?fn=getquestionlist&content=&pageNum=0&pageSize=10&canAnswer=true',
-  //'GET /api/banner': getBanner,
+  'POST /api/banner4': 'http://localhost:8085/ajax/mhshiHandler.ashx?fn=getaa&api=true',
+  'GET /api/banner5': 'http://localhost:8085/ajax/mhshiHandler.ashx?fn=getquestionlist&content=&pageNum=0&pageSize=10&canAnswer=true',
+  'GET /api/banner': getBanner,
   'POST /api/banner': {
     $params: {
       pageSize: {
@@ -78,6 +80,7 @@ const proxy = {
     'list|100': [{ name: '@city', 'value|1-100': 150, 'type|0-2': 1 }],
   }),
   'GET /api/fake_list': getFakeList,
+  //'GET /api/fake_chart_data': 'http://mymengqiqi.com/mhshi/ajax/mhshiHandler.ashx?fn=getquestionlist&content=&pageNum=0&pageSize=10&canAnswer=true', 
   'GET /api/fake_chart_data': getFakeChartData,
   'GET /api/profile/basic': getProfileBasicData,
   'GET /api/profile/advanced': getProfileAdvancedData,
@@ -148,3 +151,4 @@ const proxy = {
 };
 
 export default (noProxy ? {} : delay(proxy, 1000));
+//export default proxy

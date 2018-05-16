@@ -1,5 +1,6 @@
 import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'dva';
+import { getNowFormatDate } from '../../utils/common'
 import moment from 'moment';
 import {
   Row,
@@ -17,6 +18,7 @@ import {
   Badge,
   Divider,
   Avatar,
+  DatePicker,
 } from 'antd';
 import StandardTable from 'components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
@@ -33,9 +35,9 @@ const getValue = obj =>
 const statusMap = ['default', 'processing'];
 const status = ['已下架', '已上架'];
 
-@connect(({ ques, loading }) => ({
-  ques,
-  loading: loading.models.ques,
+@connect(({ withdraw, loading }) => ({
+  withdraw,
+  loading: loading.models.withdraw,
 }))
 @Form.create()
 export default class TableList extends PureComponent {
@@ -49,7 +51,7 @@ export default class TableList extends PureComponent {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'ques/fetch',
+      type: 'withdraw/fetch',
     });
   }
 
@@ -74,7 +76,7 @@ export default class TableList extends PureComponent {
     }
 
     dispatch({
-      type: 'ques/fetch',
+      type: 'withdraw/fetch',
       payload: params,
     });
   };
@@ -85,7 +87,7 @@ export default class TableList extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'ques/fetch',
+      type: 'withdraw/fetch',
       payload: {},
     });
   };
@@ -104,6 +106,12 @@ export default class TableList extends PureComponent {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
 
+      if (fieldsValue.beginDate)
+        fieldsValue.beginDate = getNowFormatDate(fieldsValue.beginDate._d)
+
+      if (fieldsValue.endDate)
+        fieldsValue.endDate = getNowFormatDate(fieldsValue.endDate._d)
+
       const values = {
         ...fieldsValue,
         //updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
@@ -114,7 +122,7 @@ export default class TableList extends PureComponent {
       });
 
       dispatch({
-        type: 'ques/fetch',
+        type: 'withdraw/fetch',
         payload: values,
       });
     });
@@ -128,7 +136,7 @@ export default class TableList extends PureComponent {
 
   handleAdd = fields => {
     this.props.dispatch({
-      type: 'ques/add',
+      type: 'withdraw/add',
       payload: {
         name: fields.name,
         sort: fields.sort,
@@ -147,7 +155,7 @@ export default class TableList extends PureComponent {
   handleDel = fields => {
     const { selectedRows } = this.state;
     this.props.dispatch({
-      type: 'ques/remove',
+      type: 'withdraw/remove',
       payload: {
         id: fields.key,
       },
@@ -163,7 +171,7 @@ export default class TableList extends PureComponent {
   tableUpdate = () => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'ques/fetch',
+      type: 'withdraw/fetch',
     });
   }
 
@@ -172,17 +180,22 @@ export default class TableList extends PureComponent {
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
-          <Col md={8} sm={24}>
-            <FormItem label="问题">
-              {getFieldDecorator('content')(<Input placeholder="请输入" />)}
+          <Col md={6} sm={24}>
+            <FormItem label="名字">
+              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
             </FormItem>
           </Col>
-          <Col md={8} sm={24}>
-            <FormItem label="医生">
-              {getFieldDecorator('docName')(<Input placeholder="请输入" />)}
+          <Col md={6} sm={24}>
+            <FormItem label="开始日期">
+              {getFieldDecorator('beginDate')(<DatePicker />)}
             </FormItem>
           </Col>
-          <Col md={8} sm={24}>
+          <Col md={6} sm={24}>
+            <FormItem label="结束日期">
+              {getFieldDecorator('endDate')(<DatePicker />)}
+            </FormItem>
+          </Col>
+          <Col md={6} sm={24}>
             <span className={styles.submitButtons}>
               <Button type="primary" htmlType="submit">
                 查询
@@ -202,18 +215,21 @@ export default class TableList extends PureComponent {
   }
 
   render() {
-    const { ques: { data }, loading } = this.props;
+    const { withdraw: { data }, loading } = this.props;
     const { selectedRows } = this.state;
 
     const columns = [{
-      title: '名称',
+      title: '提现人',
       dataIndex: 'nickName',
     }, {
-      title: '问题',
-      dataIndex: 'content',
+      title: '提现金额',
+      dataIndex: 'realName',
     }, {
-      title: '医生',
-      dataIndex: 'docName',
+      title: '提现时间',
+      dataIndex: 'phone',
+    }, {
+      title: '操作',
+      dataIndex: 'answeredNum',
     }];
 
     const parentMethods = {

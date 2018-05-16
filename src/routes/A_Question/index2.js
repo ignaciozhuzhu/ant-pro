@@ -33,9 +33,9 @@ const getValue = obj =>
 const statusMap = ['default', 'processing'];
 const status = ['已下架', '已上架'];
 
-@connect(({ ques, loading }) => ({
-  ques,
-  loading: loading.models.ques,
+@connect(({ answer, loading }) => ({
+  answer,
+  loading: loading.models.answer,
 }))
 @Form.create()
 export default class TableList extends PureComponent {
@@ -49,7 +49,7 @@ export default class TableList extends PureComponent {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'ques/fetch',
+      type: 'answer/fetch',
     });
   }
 
@@ -74,10 +74,11 @@ export default class TableList extends PureComponent {
     }
 
     dispatch({
-      type: 'ques/fetch',
+      type: 'answer/fetch',
       payload: params,
     });
   };
+
   handleFormReset = () => {
     const { form, dispatch } = this.props;
     form.resetFields();
@@ -85,7 +86,7 @@ export default class TableList extends PureComponent {
       formValues: {},
     });
     dispatch({
-      type: 'ques/fetch',
+      type: 'answer/fetch',
       payload: {},
     });
   };
@@ -114,7 +115,7 @@ export default class TableList extends PureComponent {
       });
 
       dispatch({
-        type: 'ques/fetch',
+        type: 'answer/fetch',
         payload: values,
       });
     });
@@ -128,7 +129,7 @@ export default class TableList extends PureComponent {
 
   handleAdd = fields => {
     this.props.dispatch({
-      type: 'ques/add',
+      type: 'answer/add',
       payload: {
         name: fields.name,
         sort: fields.sort,
@@ -147,7 +148,7 @@ export default class TableList extends PureComponent {
   handleDel = fields => {
     const { selectedRows } = this.state;
     this.props.dispatch({
-      type: 'ques/remove',
+      type: 'answer/remove',
       payload: {
         id: fields.key,
       },
@@ -163,7 +164,7 @@ export default class TableList extends PureComponent {
   tableUpdate = () => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'ques/fetch',
+      type: 'answer/fetch',
     });
   }
 
@@ -174,12 +175,12 @@ export default class TableList extends PureComponent {
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={8} sm={24}>
             <FormItem label="问题">
-              {getFieldDecorator('content')(<Input placeholder="请输入" />)}
+              {getFieldDecorator('qcontent')(<Input placeholder="请输入" />)}
             </FormItem>
           </Col>
           <Col md={8} sm={24}>
             <FormItem label="医生">
-              {getFieldDecorator('docName')(<Input placeholder="请输入" />)}
+              {getFieldDecorator('answer')(<Input placeholder="请输入" />)}
             </FormItem>
           </Col>
           <Col md={8} sm={24}>
@@ -202,18 +203,18 @@ export default class TableList extends PureComponent {
   }
 
   render() {
-    const { ques: { data }, loading } = this.props;
+    const { answer: { data }, loading } = this.props;
     const { selectedRows } = this.state;
 
     const columns = [{
-      title: '名称',
-      dataIndex: 'nickName',
+      title: '医生',
+      dataIndex: 'answer',
+    }, {
+      title: '回答',
+      dataIndex: 'acontent',
     }, {
       title: '问题',
-      dataIndex: 'content',
-    }, {
-      title: '医生',
-      dataIndex: 'docName',
+      dataIndex: 'qcontent',
     }];
 
     const parentMethods = {

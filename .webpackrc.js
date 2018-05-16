@@ -15,10 +15,21 @@ export default {
   },
   ignoreMomentLocale: true,
   theme: './src/theme.js',
+  "define": {
+    "process.env.TEST": 1,
+    "USE_COMMA": 2,
+  },
   html: {
     template: './src/index.ejs',
   },
   disableDynamicImport: true,
   publicPath: '/',
+  "proxy": {
+    "/api2": {
+      "target": "http://localhost:8085/",
+      "changeOrigin": true,
+      "pathRewrite": { "^/api2": "" }
+    }
+  },
   hash: true,
 };
