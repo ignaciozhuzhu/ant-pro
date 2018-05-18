@@ -55,17 +55,17 @@ export async function removeBanner(params) {
 /*ques*********************************************************/
 export async function queryQues(params) {
   if (params)
-    return request(getServer() + `mhshiHandler.ashx?fn=getquestionlistadmin&content=${params.content}&docName=${params.docName}`);
+    return request(getServer() + `mhshiHandler.ashx?fn=getquestionlistadmin&content=${params.content}&direType=${params.direType}&docName=${params.docName}`);
   else
     return request(getServer() + `mhshiHandler.ashx?fn=getquestionlistadmin`);
 }
 
 export async function addQues(params) {
-  return request(getServer() + `mhshiHandler.ashx?fn=editbanner&name=${params.name}&sort=${params.sort}&isList=${params.isList}&id=${params.id}`)
+  return request(getServer() + `mhshiHandler.ashx?fn=updatequestionadmin&content=${params.content}&direType=${params.direType}&id=${params.id}`)
 }
 
 export async function removeQues(params) {
-  return request(getServer() + `mhshiHandler.ashx?fn=delbanner&id=${params.id}`)
+  return request(getServer() + `mhshiHandler.ashx?fn=deletequestionadmin&id=${params.id}`)
 }
 /**********************************************************/
 
@@ -78,11 +78,11 @@ export async function queryAnswer(params) {
 }
 
 export async function addAnswer(params) {
-  return request(getServer() + `mhshiHandler.ashx?fn=editbanner&name=${params.name}&sort=${params.sort}&isList=${params.isList}&id=${params.id}`)
+  return request(getServer() + `mhshiHandler.ashx?fn=updateansweradmin&qid=${params.qid}&content=${params.content}&id=${params.id}`)
 }
 
 export async function removeAnswer(params) {
-  return request(getServer() + `mhshiHandler.ashx?fn=delbanner&id=${params.id}`)
+  return request(getServer() + `mhshiHandler.ashx?fn=deleteansweradmin&id=${params.id}`)
 }
 /**********************************************************/
 

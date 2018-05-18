@@ -30,8 +30,43 @@ const getValue = obj =>
   Object.keys(obj)
   .map(key => obj[key])
   .join(',');
-const statusMap = ['default', 'processing'];
-const status = ['已下架', '已上架'];
+
+const CreateForm = Form.create()(props => {
+  const { modalVisible, form, handleAdd, handleModalVisible, data_id, data_content, data_qid } = props;
+  const okHandle = () => {
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      form.resetFields();
+      handleAdd(fieldsValue);
+    });
+  };
+  return (
+    <Modal
+      title="编辑"
+      visible={modalVisible}
+      onOk={okHandle}
+      onCancel={() => handleModalVisible()}
+    >
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="id">
+        {form.getFieldDecorator('id', {
+          rules: [{ required: true, message: '请输入...' }],
+          initialValue:data_id,
+        })(<Input disabled />)}
+      </FormItem>
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="回答内容">
+        {form.getFieldDecorator('content', {
+          rules: [{ required: true, message: '请输入...' }],
+          initialValue:data_content
+        })(<Input placeholder="请输入" />)}
+      </FormItem>
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="问题id">
+         {form.getFieldDecorator('qid', {
+          rules: [{ required: true, message: '请输入...' }],
+          initialValue:data_qid})(<Input placeholder="请输入" />)}
+      </FormItem>
+    </Modal>
+  );
+});
 
 @connect(({ answer, loading }) => ({
   answer,
@@ -121,20 +156,28 @@ export default class TableList extends PureComponent {
     });
   };
 
-  handleModalVisible = (flag) => {
-    this.setState({
-      modalVisible: !!flag,
-    });
+  handleModalVisible = (flag, record) => {
+    console.log(record)
+    if (record)
+      this.setState({
+        modalVisible: !!flag,
+        data_id: record.id,
+        data_content: record.acontent,
+        data_qid: record.qid,
+      });
+    else
+      this.setState({
+        modalVisible: !!flag,
+      });
   };
 
   handleAdd = fields => {
     this.props.dispatch({
       type: 'answer/add',
       payload: {
-        name: fields.name,
-        sort: fields.sort,
-        isList: fields.status,
-        id: fields.key,
+        content: fields.content,
+        qid: fields.qid,
+        id: fields.id,
       },
     });
 
@@ -150,7 +193,7 @@ export default class TableList extends PureComponent {
     this.props.dispatch({
       type: 'answer/remove',
       payload: {
-        id: fields.key,
+        id: fields.id,
       },
     });
 
@@ -204,18 +247,33 @@ export default class TableList extends PureComponent {
 
   render() {
     const { answer: { data }, loading } = this.props;
-    const { selectedRows } = this.state;
+    const { selectedRows, modalVisible, data_id, data_content, data_qid } = this.state;
 
     const columns = [{
       title: '医生',
       dataIndex: 'answer',
     }, {
-      title: '回答',
+      title: '回答内容',
       dataIndex: 'acontent',
+      render: (value) => (
+        <div>{value?(value.length>18?value.substr(0,16)+'...':value):''}</div>
+      ),
     }, {
       title: '问题',
       dataIndex: 'qcontent',
-    }];
+      render: (value) => (
+        <div>{value?(value.length>18?value.substr(0,16)+'...':value):''}</div>
+      ),
+    }, {
+      title: '操作',
+      render: (value, record) => (
+        <Fragment>
+            <a onClick={() => this.handleModalVisible(true,record)}>编辑</a>
+            <Divider type="vertical" />
+            <a onClick={() => this.handleDel(record)}>删除</a>
+          </Fragment>
+      ),
+    }, ];
 
     const parentMethods = {
       handleAdd: this.handleAdd,
@@ -228,6 +286,9 @@ export default class TableList extends PureComponent {
           <div className={styles.tableList}>
             <div className={styles.tableListForm}>{this.renderForm()}</div>
             <div className={styles.tableListOperator}>
+              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true,{id:0})}>
+                新增
+              </Button>
             </div>
             <StandardTable
               selectedRows={selectedRows}
@@ -240,6 +301,7 @@ export default class TableList extends PureComponent {
             />
           </div>
         </Card>
+        <CreateForm {...parentMethods} modalVisible={modalVisible} data_id={data_id} data_qid={data_qid} data_content={data_content} />
       </PageHeaderLayout>
     );
   }
